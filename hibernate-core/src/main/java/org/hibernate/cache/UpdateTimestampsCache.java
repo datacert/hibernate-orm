@@ -60,6 +60,11 @@ public class UpdateTimestampsCache {
 
 	@SuppressWarnings({"UnnecessaryBoxing"})
 	public void preinvalidate(Serializable[] spaces) throws CacheException {
+		
+		if (spaces.length == 0) {
+			return;
+		}
+		
 		// TODO: to handle concurrent writes correctly, this should return a Lock to the client
 
 		readWriteLock.writeLock().lock();
@@ -83,6 +88,11 @@ public class UpdateTimestampsCache {
 
 	 @SuppressWarnings({"UnnecessaryBoxing"})
 	 public void invalidate(Serializable[] spaces) throws CacheException {
+
+		 if (spaces.length == 0) {
+			 return;
+		 }
+			
 		//TODO: to handle concurrent writes correctly, the client should pass in a Lock
 
 		 readWriteLock.writeLock().lock();

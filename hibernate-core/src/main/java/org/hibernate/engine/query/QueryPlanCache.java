@@ -37,6 +37,9 @@ import org.hibernate.impl.FilterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
@@ -66,15 +69,10 @@ public class QueryPlanCache implements Serializable {
 				factory.getProperties(),
 				SoftLimitMRUCache.DEFAULT_STRONG_REF_COUNT
 		);
-		int maxSoftReferenceCount = PropertiesHelper.getInt(
-				Environment.QUERY_PLAN_CACHE_MAX_SOFT_REFERENCES,
-				factory.getProperties(),
-				SoftLimitMRUCache.DEFAULT_SOFT_REF_COUNT
-		);
 
 		this.factory = factory;
-		this.sqlParamMetadataCache = new SimpleMRUCache( maxStrongReferenceCount );
-		this.planCache = new SoftLimitMRUCache( maxStrongReferenceCount, maxSoftReferenceCount );
+		this.sqlParamMetadataCache = CacheBuilder.newBuilder().maximumSize( maxStrongReferenceCount ).build();
+		this.planCache = CacheBuilder.newBuilder().maximumSize( maxStrongReferenceCount ).build();
 	}
 
 	/**
@@ -85,12 +83,12 @@ public class QueryPlanCache implements Serializable {
 	 * Used solely for caching param metadata for native-sql queries, see {@link #getSQLParameterMetadata} for a
 	 * discussion as to why...
 	 */
-	private final SimpleMRUCache sqlParamMetadataCache;
+	private final Cache<String, ParameterMetadata> sqlParamMetadataCache;
 
 	/**
 	 * the cache of the actual plans...
 	 */
-	private final SoftLimitMRUCache planCache;
+	private final Cache<Object, Object> planCache;
 
 
 	/**
@@ -104,7 +102,7 @@ public class QueryPlanCache implements Serializable {
 	 * @return The parameter metadata
 	 */
 	public ParameterMetadata getSQLParameterMetadata(String query) {
-		ParameterMetadata metadata = ( ParameterMetadata ) sqlParamMetadataCache.get( query );
+		ParameterMetadata metadata = ( ParameterMetadata ) sqlParamMetadataCache.getIfPresent( query );
 		if ( metadata == null ) {
 			metadata = buildNativeSQLParameterMetadata( query );
 			sqlParamMetadataCache.put( query, metadata );
@@ -115,13 +113,14 @@ public class QueryPlanCache implements Serializable {
 	public HQLQueryPlan getHQLQueryPlan(String queryString, boolean shallow, Map enabledFilters)
 			throws QueryException, MappingException {
 		HQLQueryPlanKey key = new HQLQueryPlanKey( queryString, shallow, enabledFilters );
-		HQLQueryPlan plan = ( HQLQueryPlan ) planCache.get ( key );
+		HQLQueryPlan plan = ( HQLQueryPlan ) planCache.getIfPresent ( key );
 
 		if ( plan == null ) {
 			if ( log.isTraceEnabled() ) {
 				log.trace( "unable to locate HQL query plan in cache; generating (" + queryString + ")" );
 			}
 			plan = new HQLQueryPlan(queryString, shallow, enabledFilters, factory );
+			planCache.put( key, plan );
 		}
 		else {
 			if ( log.isTraceEnabled() ) {
@@ -129,21 +128,20 @@ public class QueryPlanCache implements Serializable {
 			}
 		}
 
-		planCache.put( key, plan );
-
 		return plan;
 	}
 
 	public FilterQueryPlan getFilterQueryPlan(String filterString, String collectionRole, boolean shallow, Map enabledFilters)
 			throws QueryException, MappingException {
 		FilterQueryPlanKey key = new FilterQueryPlanKey( filterString, collectionRole, shallow, enabledFilters );
-		FilterQueryPlan plan = ( FilterQueryPlan ) planCache.get ( key );
+		FilterQueryPlan plan = ( FilterQueryPlan ) planCache.getIfPresent ( key );
 
 		if ( plan == null ) {
 			if ( log.isTraceEnabled() ) {
 				log.trace( "unable to locate collection-filter query plan in cache; generating (" + collectionRole + " : " + filterString + ")" );
 			}
 			plan = new FilterQueryPlan( filterString, collectionRole, shallow, enabledFilters, factory );
+			planCache.put( key, plan );
 		}
 		else {
 			if ( log.isTraceEnabled() ) {
@@ -151,19 +149,18 @@ public class QueryPlanCache implements Serializable {
 			}
 		}
 
-		planCache.put( key, plan );
-
 		return plan;
 	}
 
 	public NativeSQLQueryPlan getNativeSQLQueryPlan(NativeSQLQuerySpecification spec) {
-		NativeSQLQueryPlan plan = ( NativeSQLQueryPlan ) planCache.get( spec );
+		NativeSQLQueryPlan plan = ( NativeSQLQueryPlan ) planCache.getIfPresent( spec );
 
 		if ( plan == null ) {
 			if ( log.isTraceEnabled() ) {
 				log.trace( "unable to locate native-sql query plan in cache; generating (" + spec.getQueryString() + ")" );
 			}
 			plan = new NativeSQLQueryPlan( spec, factory );
+			planCache.put( spec, plan );
 		}
 		else {
 			if ( log.isTraceEnabled() ) {
@@ -171,7 +168,6 @@ public class QueryPlanCache implements Serializable {
 			}
 		}
 
-		planCache.put( spec, plan );
 		return plan;
 	}
 

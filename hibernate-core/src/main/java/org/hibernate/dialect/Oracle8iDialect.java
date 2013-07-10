@@ -28,6 +28,9 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.CallableStatement;
 
+import java.util.List;
+
+import org.hibernate.annotations.common.util.StringHelper;
 import org.hibernate.sql.CaseFragment;
 import org.hibernate.sql.DecodeCaseFragment;
 import org.hibernate.sql.JoinFragment;
@@ -494,4 +497,25 @@ public class Oracle8iDialect extends Dialect {
 		return false;
 	}
 
+	@Override
+	public String getQueryHintString(String sql, List<String> hints) {
+		final String hint = StringHelper.join( ", ", hints.iterator() );
+		
+		if ( StringHelper.isEmpty( hint ) ) {
+			return sql;
+		}
+
+		final int pos = sql.indexOf( "select" );
+		if ( pos > -1 ) {
+			final StringBuilder buffer = new StringBuilder( sql.length() + hint.length() + 8 );
+			if ( pos > 0 ) {
+				buffer.append( sql.substring( 0, pos ) );
+			}
+			buffer.append( "select /*+ " ).append( hint ).append( " */" )
+					.append( sql.substring( pos + "select".length() ) );
+			sql = buffer.toString();
+		}
+
+		return sql;
+	}
 }

@@ -75,6 +75,7 @@ public class CriteriaImpl implements Criteria, Serializable {
 	private boolean cacheable;
 	private String cacheRegion;
 	private String comment;
+	private final List<String> queryHints = new ArrayList<String>();
 
 	private FlushMode flushMode;
 	private CacheMode cacheMode;
@@ -328,6 +329,15 @@ public class CriteriaImpl implements Criteria, Serializable {
 
 	public Criteria setComment(String comment) {
 		this.comment = comment;
+		return this;
+	}
+
+	public List<String> getQueryHints() {
+		return queryHints;
+	}
+
+	public Criteria addQueryHint(String queryHint) {
+		queryHints.add( queryHint );
 		return this;
 	}
 
@@ -621,6 +631,11 @@ public class CriteriaImpl implements Criteria, Serializable {
 			return this;
 		}
 
+		public Criteria addQueryHint(String queryHint) {
+			CriteriaImpl.this.addQueryHint( queryHint );
+			return this;
+		}
+		
 		public Criteria setProjection(Projection projection) {
 			CriteriaImpl.this.projection = projection;
 			CriteriaImpl.this.projectionCriteria = this;

@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.QueryHint;
+
 import org.hibernate.transform.ResultTransformer;
 import org.hibernate.type.Type;
 
@@ -228,6 +230,16 @@ public interface Query {
 	 * for the default query cache
 	 */
 	public Query setCacheRegion(String cacheRegion);
+	
+	/**
+	 * Add a DB query hint to the SQL.  These differ from JPA's {@link QueryHint}, which is specific to the JPA
+	 * implementation and ignores DB vendor-specific hints.  Instead, these are intended solely for the vendor-specific
+	 * hints, such as Oracle's optimizers.  Multiple query hints are supported; the Dialect will determine
+	 * concatenation and placement.
+	 * 
+	 * @param hint The database specific query hint to add.
+	 */
+	public Query addQueryHint(String hint);
 
 	/**
 	 * Set a timeout for the underlying JDBC query.

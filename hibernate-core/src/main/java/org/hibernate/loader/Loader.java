@@ -227,6 +227,12 @@ public abstract class Loader {
 
 		sql = applyLocks( sql, parameters.getLockOptions(), dialect );
 		
+		// Keep this here, rather than moving to Select.  Some Dialects may need the hint to be appended to the very
+		// end or beginning of the finalized SQL statement, so wait until everything is processed.
+		if ( parameters.getQueryHints() != null && parameters.getQueryHints().size() > 0 ) {
+			sql = dialect.getQueryHintString( sql, parameters.getQueryHints() );
+		 }
+		 
 		return getFactory().getSettings().isCommentsEnabled() ?
 				prependComment( sql, parameters ) : sql;
 	}

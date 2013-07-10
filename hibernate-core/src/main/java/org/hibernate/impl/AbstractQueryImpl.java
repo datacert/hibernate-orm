@@ -95,6 +95,7 @@ public abstract class AbstractQueryImpl implements Query {
 	private boolean cacheable;
 	private String cacheRegion;
 	private String comment;
+	private final List<String> queryHints = new ArrayList<String>();
 	private FlushMode flushMode;
 	private CacheMode cacheMode;
 	private FlushMode sessionFlushMode;
@@ -162,6 +163,11 @@ public abstract class AbstractQueryImpl implements Query {
 		this.comment = comment;
 		return this;
 	}
+	
+	public Query addQueryHint(String queryHint) {
+		queryHints.add( queryHint );
+		return this;
+	} 
 
 	public Query setFirstResult(int firstResult) {
 		selection.setFirstRow( new Integer(firstResult) );
@@ -926,6 +932,7 @@ public abstract class AbstractQueryImpl implements Query {
 				cacheable,
 				cacheRegion,
 				comment,
+				queryHints,
 				collectionKey == null ? null : new Serializable[] { collectionKey },
 				optionalObject,
 				optionalEntityName,

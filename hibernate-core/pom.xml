@@ -35,6 +35,7 @@
 
     <groupId>org.hibernate</groupId>
     <artifactId>hibernate-core</artifactId>
+    <version>3.6.10.Final+patch.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Hibernate Core</name>

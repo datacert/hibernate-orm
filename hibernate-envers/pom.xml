@@ -35,6 +35,7 @@
 
     <groupId>org.hibernate</groupId>
     <artifactId>hibernate-envers</artifactId>
+    <version>3.6.10.Final+patch.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Hibernate Envers</name>
@@ -155,17 +156,17 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>${project.version}</version>
+                <version>3.6.10.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
-                <version>${project.version}</version>
+                <version>3.6.10.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-testing</artifactId>
-                <version>${project.version}</version>
+                <version>3.6.10.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>

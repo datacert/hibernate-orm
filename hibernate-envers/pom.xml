@@ -35,7 +35,7 @@
 
     <groupId>org.hibernate</groupId>
     <artifactId>hibernate-envers</artifactId>
-    <version>3.6.10.Final+patch.1-SNAPSHOT</version>
+    <version>3.6.10.Final+patch.1</version>
     <packaging>jar</packaging>
 
     <name>Hibernate Envers</name>

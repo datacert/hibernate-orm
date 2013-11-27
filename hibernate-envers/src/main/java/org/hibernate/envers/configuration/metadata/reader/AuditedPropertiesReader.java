@@ -151,8 +151,8 @@ public class AuditedPropertiesReader {
 		Audited allClassAudited = computeAuditConfiguration(clazz, declaredAuditedSuperclasses);
 
 		//look in the class
-		addFromProperties(clazz.getDeclaredProperties("field"), "field", fieldAccessedPersistentProperties, allClassAudited);
-		addFromProperties(clazz.getDeclaredProperties("property"), "property", propertyAccessedPersistentProperties, allClassAudited);
+		addFromProperties(clazz.getDeclaredProperties("field"), fieldAccessedPersistentProperties, allClassAudited);
+		addFromProperties(clazz.getDeclaredProperties("property"), propertyAccessedPersistentProperties, allClassAudited);
 		
 		if(allClassAudited != null || !auditedPropertiesHolder.isEmpty()) {
 			XClass superclazz = clazz.getSuperclass();
@@ -162,14 +162,16 @@ public class AuditedPropertiesReader {
 		}
 	}
 
-	private void addFromProperties(Iterable<XProperty> properties, String accessType, Set<String> persistentProperties, Audited allClassAudited) {
+	private void addFromProperties(Iterable<XProperty> properties, Set<String> persistentProperties, Audited allClassAudited) {
 		for (XProperty property : properties) {
 			// If this is not a persistent property, with the same access type as currently checked,
 			// it's not audited as well. 
 			// If the property was already defined by the subclass, is ignored by superclasses
 			if ((persistentProperties.contains(property.getName()) && (!auditedPropertiesHolder
 					.contains(property.getName())))) {
-				Value propertyValue = persistentPropertiesSource.getProperty(property.getName()).getValue();
+				Property prop = persistentPropertiesSource.getProperty(property.getName());
+				String accessType = prop.getPropertyAccessorName();
+				Value propertyValue = prop.getValue();
 				if (propertyValue instanceof Component) {
 					this.addFromComponentProperty(property, accessType, (Component)propertyValue, allClassAudited);
 				} else {

@@ -1,3 +1,8 @@
+License
+=======
+
+This repository houses minor changes to the hibernate library.  These changes are released under LGPL v2.1 (the same license as the hibernate library itself).
+
 How to build
 ============
 

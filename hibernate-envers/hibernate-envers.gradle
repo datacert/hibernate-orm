@@ -1,5 +1,7 @@
 apply plugin: 'hibernate-matrix-testing'
 
+version = '4.3.6.Final+patch.1'
+
 configurations {
     hibernateJpaModelGenTool {
         description = "Dependencies for running the Hibernate JPA Metamodel Generator AnnotationProcessor tool"
